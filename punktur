@@ -1,0 +1,36 @@
+import math
+
+R_SJOMILUR = 3440.065   # radíus jarðar í sjómílum
+
+def punktur_fra(lat, lon, stefna, sjomilur):
+    """Staðsetning sem er `sjomilur` frá (lat, lon) í stefnu `stefna` (°)."""
+    d = sjomilur / R_SJOMILUR
+    t = math.radians(stefna)
+    la1, lo1 = math.radians(lat), math.radians(lon)
+    la2 = math.asin(math.sin(la1) * math.cos(d) +
+                    math.cos(la1) * math.sin(d) * math.cos(t))
+    lo2 = lo1 + math.atan2(math.sin(t) * math.sin(d) * math.cos(la1),
+                           math.cos(d) - math.sin(la1) * math.sin(la2))
+    return math.degrees(la2), math.degrees(lo2)
+
+def stefna_milli(lat1, lon1, lat2, lon2):
+    """Stefna (°) frá punkti 1 til punkts 2."""
+    p1, p2 = math.radians(lat1), math.radians(lat2)
+    dl = math.radians(lon2 - lon1)
+    x = math.sin(dl) * math.cos(p2)
+    y = math.cos(p1) * math.sin(p2) - math.sin(p1) * math.cos(p2) * math.cos(dl)
+    return math.degrees(math.atan2(x, y)) % 360
+
+# Nýi vitinn (hnit veðurstöðvarinnar 1453)
+nyi_lat, nyi_lon = 64.0817, -22.6893
+
+# Gamli vitinn: NÁLGUN, 215 m til norðvesturs af þeim nýja.
+# Skiptu út fyrir rétt hnit ef þú finnur þau.
+gamli_lat, gamli_lon = punktur_fra(nyi_lat, nyi_lon, 315, 215 / 1852)
+
+# Stefna miðsins og punktur 6 sjómílur frá landi
+mid = stefna_milli(nyi_lat, nyi_lon, gamli_lat, gamli_lon)
+punktur_lat, punktur_lon = punktur_fra(gamli_lat, gamli_lon, mid, 6)
+
+print(f"Stefna á miði: {mid:.1f}°")
+print(f"6 sjómílur á miði: {punktur_lat:.4f}, {punktur_lon:.4f}")
