@@ -70,7 +70,7 @@ def teikna(r, stefna, bat_hradi, straumur_stefna, straumur_kt, titill):
         ax.text((x0 + x1) / 2, (y0 + y1) / 2, texti, color=litur)
 
     ora(0, 0, r["hx"], r["hy"], "blue", f"Stefna {stefna:03.0f}° {bat_hradi:.1f} kt")
-    ora(r["hx"], r["hy"], r["cx"], r["cy"], "orange", f"Leeway {r['leeway_horn']:+.1f}°")
+    ora(r["hx"], r["hy"], r["cx"], r["cy"], "orange", f"Drift {r['leeway_horn']:+.1f}°")
     ora(r["cx"], r["cy"], r["rx"], r["ry"], "green",
         f"Straumur {straumur_stefna:03.0f}° {straumur_kt:.2f} kt")
     ora(0, 0, r["rx"], r["ry"], "red",
@@ -110,7 +110,7 @@ if __name__ == "__main__":
     print(f"Punktur: {lat:.4f}, {lon:.4f}")
     print(f"Vindur kl. {vindur['timi']}: {vindur['hradi_ms']} m/s úr {vindur['att']}°")
     print(f"Straumur kl. {straumur['timi']} UTC: {straumur['hradi_kt']:.2f} kt í {straumur['att_til']:.0f}°")
-    print(f"Leeway: {r['leeway_horn']:+.1f}°  (+ er til stjórnborða, - til bakborða)")
+    print(f"Drift: {r['leeway_horn']:+.1f}°  (+ er til stjórnborða, - til bakborða)")
     print(f"Stefna í sjó: {r['stefna_i_sjo']:.0f}°")
     print(f"Raunstefna: {r['raunstefna']:.0f}°")
     print(f"Hraði yfir botn: {r['hradi_yfir_botn']:.1f} kt")
