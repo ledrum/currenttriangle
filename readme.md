@@ -1,4 +1,4 @@
-# currenttriangle / Straumþríhyrningur
+# Straumþríhyrningur / Current Triangle
 
 **Íslenska** | [English](#english)
 
