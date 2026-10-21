@@ -2,7 +2,7 @@
 
 **Íslenska** | [English](#english)
 
-Lítið Python-verkefni sem reiknar *straumþríhyrning* fyrir bát úr rauntíma vind- og straumgögnum við Garðskaga: hvaða raunstefnu og hraða yfir botn báturinn fær, og öfugt, hvaða stefnu þarf að stýra til að halda óskaðri raunstefnu.
+Lítið Python-verkefni sem reiknar *straumþríhyrning* fyrir bát úr rauntíma vind- og straumgögnum við Garðskaga í miðinu "Vitarnir saman" 6 sjómílur frá landi: hvaða raunstefnu og hraða yfir botn báturinn fær, og öfugt, hvaða stefnu þarf að stýra til að halda óskaðri raunstefnu.
 
 Þetta er námsverkefni. Ég er að læra Python og smíðaði þetta með hjálp Claude (Anthropic).
 
@@ -62,7 +62,7 @@ MIT, sjá `LICENSE`.
 
 # currenttriangle (English)
 
-A small Python project that computes a *current triangle* for a boat from live wind and ocean-current data off Garðskagi, Iceland: the course and speed over ground you get from a given heading, and, in reverse, the heading you must steer to make good a desired course over ground.
+A small Python project that computes a *current triangle* for a boat from live wind and ocean-current data off Garðskagi in the old "Vitarnir saman" transit (the two lighthouses in line 6 nm from land), Iceland: the course and speed over ground you get from a given heading, and, in reverse, the heading you must steer to make good a desired course over ground.
 
 This is a learning project. I'm learning Python and built it with help from Claude (Anthropic).
 
