@@ -11,4 +11,7 @@ print("Próf 2:", st, r["raunstefna"], r["hradi_yfir_botn"])
 
 # 3. Straumur sterkari en báturinn: engin lausn
 st, r = reikna_ofugt(0, 5, 0, 0, 90, 6)
-print("Próf 3:", st, r["raunstefna"])
+if st is None:
+    print("Próf 3: engin lausn, straumurinn er sterkari en báturinn")
+else:
+    print("Próf 3:", st, r["raunstefna"])

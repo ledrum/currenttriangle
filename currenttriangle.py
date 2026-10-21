@@ -69,6 +69,8 @@ def reikna_ofugt(oskastefna, bat_hradi, vindatt, vindur_kt,
         if abs(villa) < 0.01:
             break
         stefna = stefna + villa
+        else:
+        return None, r
     return stefna % 360, r
 
 def teikna(r, stefna, bat_hradi, straumur_stefna, straumur_kt, titill):
