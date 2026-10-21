@@ -59,7 +59,7 @@ def reikna(stefna, bat_hradi, vindatt, vindur_kt,
         "raunstefna": stefna_vektors(rx, ry),
         "hradi_yfir_botn": math.hypot(rx, ry),
     }
-def reikna_oefugt(oskastefna, bat_hradi, vindatt, vindur_kt,
+def reikna_ofugt(oskastefna, bat_hradi, vindatt, vindur_kt,
                   straumur_stefna, straumur_kt):
     stefna = oskastefna
     for i in range(20):
