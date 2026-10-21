@@ -1,0 +1,154 @@
+<div id="st-app" style="max-width:640px;font-family:system-ui,sans-serif;">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
+<strong id="st-titill"></strong>
+<span>
+<button type="button" id="st-is" style="padding:2px 10px;">IS</button>
+<button type="button" id="st-en" style="padding:2px 10px;">EN</button>
+</span>
+</div>
+<p id="st-leidbeiningar" style="margin:8px 0;"></p>
+<p>
+<label><input type="radio" name="st-ham" value="afram" checked> <span id="st-t-afram"></span></label><br>
+<label><input type="radio" name="st-ham" value="ofugt"> <span id="st-t-ofugt"></span></label>
+</p>
+<div style="display:flex;flex-wrap:wrap;gap:16px;margin:12px 0;">
+<div style="display:flex;flex-direction:column;gap:4px;">
+<label for="st-stefna" style="display:block;margin:0;"><span id="st-t-stefna"></span> (°)</label>
+<input type="number" id="st-stefna" value="0" min="0" max="360" step="1" style="width:120px;margin:0;">
+</div>
+<div style="display:flex;flex-direction:column;gap:4px;">
+<label for="st-hradi" style="display:block;margin:0;"><span id="st-t-hradi"></span> (kt)</label>
+<input type="number" id="st-hradi" value="5" min="0.1" step="0.1" style="width:120px;margin:0;">
+</div>
+</div>
+<pre id="st-gogn" style="white-space:pre-wrap;margin:8px 0;">...</pre>
+<pre id="st-nidurstada" style="white-space:pre-wrap;margin:8px 0;"></pre>
+<p id="st-heimildir" style="font-size:0.85em;"></p>
+</div>
+<script>
+(function () {
+var SLOD = "/wp-content/straumur/data.json";
+var K = 0.03;
+var gogn = null;
+var mal = "is";
+var T = {
+is: {
+titill: "Straumþríhyrningur",
+leid: "Veldu hvort þú vilt reikna <b>áfram</b> (þú gefur upp stefnuna sem þú stýrir og færð raunstefnu og hraða yfir botn) eða <b>öfugt</b> (þú gefur upp stefnuna sem þú vilt fara og færð stefnuna sem þú átt að stýra). Skrifaðu stefnu í gráðum (0 = norður, 90 = austur) og hraða bátsins í sjó í hnútum. Vindur og straumur eru sóttir sjálfkrafa.",
+afram: "Áfram: ég stýri stefnu, hver verður raunstefnan?",
+ofugt: "Öfugt: ég vil fara þessa leið, hvaða stefnu á ég að stýra?",
+stefnaAfram: "Stýrð stefna",
+stefnaOfugt: "Óskuð raunstefna",
+hradi: "Hraði bátsins í sjó",
+vindur: "Vindur", straumur: "Straumur", uppf: "Gögn uppfærð",
+fra: "frá", til: "til", kt: "kt",
+drift: "Drift", driftSkyr: "(+ er til stjórnborða, - til bakborða)",
+stefnaSjo: "Stefna í sjó", raunstefna: "Raunstefna", hradiBotn: "Hraði yfir botn",
+styra: "Stýra stefnu", oskud: "Óskuð raunstefna",
+engin: "Engin lausn: straumurinn er of sterkur miðað við hraða bátsins til að halda þessari stefnu.",
+hledur: "Sæki gögn...", villa: "Ekki tókst að sækja gögn.",
+heimildir: 'Vindgögn: <a href="https://www.vedur.is">Veðurstofa Íslands</a> (Garðskagaviti). Straumgögn: <a href="https://marine.copernicus.eu">Copernicus Marine Service</a>. Þetta eru líkangögn og eru <b>ekki ætluð til siglinga</b>.'
+},
+en: {
+titill: "Current triangle",
+leid: "Choose <b>forward</b> (enter the heading you steer and get the course over ground and speed over ground) or <b>inverse</b> (enter the course you want to make good and get the heading you should steer). Enter directions in degrees (0 = north, 90 = east) and the boat speed through the water in knots. Wind and current are fetched automatically.",
+afram: "Forward: I steer a heading, what will my course over ground be?",
+ofugt: "Inverse: I want to go this way, what heading should I steer?",
+stefnaAfram: "Heading steered",
+stefnaOfugt: "Desired course over ground",
+hradi: "Boat speed through water",
+vindur: "Wind", straumur: "Current", uppf: "Data updated",
+fra: "from", til: "to", kt: "kt",
+drift: "Drift", driftSkyr: "(+ is to starboard, - to port)",
+stefnaSjo: "Course through water", raunstefna: "Course over ground", hradiBotn: "Speed over ground",
+styra: "Heading to steer", oskud: "Desired course over ground",
+engin: "No solution: the current is too strong compared to the boat speed to hold this course.",
+hledur: "Loading data...", villa: "Could not load data.",
+heimildir: 'Wind data: <a href="https://www.vedur.is">Icelandic Met Office</a> (Garðskagaviti). Current data: <a href="https://marine.copernicus.eu">Copernicus Marine Service</a>. This is model data and is <b>not intended for navigation</b>.'
+}
+};
+function $(id) { return document.getElementById(id); }
+function rad(g) { return g * Math.PI / 180; }
+function vek(hradi, stefna) { return [hradi * Math.sin(rad(stefna)), hradi * Math.cos(rad(stefna))]; }
+function stefnaVektors(x, y) { return (Math.atan2(x, y) * 180 / Math.PI + 360) % 360; }
+function horn(a) { return ((a + 540) % 360) - 180; }
+function reikna(stefna, bat, vindatt, vindkt, straumAtt, straumKt) {
+var h = vek(bat, stefna);
+var v = vek(vindkt, vindatt + 180);
+var ex = Math.sin(rad(stefna)), ey = Math.cos(rad(stefna));
+var langs = v[0] * ex + v[1] * ey;
+var wx = h[0] + K * (v[0] - langs * ex);
+var wy = h[1] + K * (v[1] - langs * ey);
+var c = vek(straumKt, straumAtt);
+var rx = wx + c[0], ry = wy + c[1];
+var stefnaSjo = stefnaVektors(wx, wy);
+return { drift: horn(stefnaSjo - stefna), stefnaSjo: stefnaSjo, raun: stefnaVektors(rx, ry), hradi: Math.hypot(rx, ry) };
+}
+function reiknaOfugt(oskud, bat, vindatt, vindkt, straumAtt, straumKt) {
+var stefna = oskud;
+for (var i = 0; i < 20; i++) {
+var r = reikna(stefna, bat, vindatt, vindkt, straumAtt, straumKt);
+var villa = horn(oskud - r.raun);
+if (Math.abs(villa) < 0.01) { return { stefna: ((stefna % 360) + 360) % 360, r: r }; }
+stefna += villa;
+}
+return null;
+}
+function hamur() {
+var r = document.getElementsByName("st-ham");
+for (var i = 0; i < r.length; i++) { if (r[i].checked) { return r[i].value; } }
+return "afram";
+}
+function teikna() {
+var t = T[mal];
+$("st-titill").textContent = t.titill;
+$("st-leidbeiningar").innerHTML = t.leid;
+$("st-t-afram").textContent = t.afram;
+$("st-t-ofugt").textContent = t.ofugt;
+$("st-t-stefna").textContent = hamur() === "afram" ? t.stefnaAfram : t.stefnaOfugt;
+$("st-t-hradi").textContent = t.hradi;
+$("st-heimildir").innerHTML = t.heimildir;
+if (!gogn) { $("st-gogn").textContent = t.hledur; $("st-nidurstada").textContent = ""; return; }
+var vi = gogn.vindur, st = gogn.straumur;
+$("st-gogn").textContent =
+t.vindur + ": " + vi.hradi_kt.toFixed(1) + " " + t.kt + " " + t.fra + " " + Math.round(vi.att) + "°\n" +
+t.straumur + ": " + st.hradi_kt.toFixed(2) + " " + t.kt + " " + t.til + " " + Math.round(st.att_til) + "°\n" +
+t.uppf + ": " + gogn.uppfaert;
+var s = parseFloat($("st-stefna").value), b = parseFloat($("st-hradi").value);
+if (isNaN(s) || isNaN(b) || b <= 0) { $("st-nidurstada").textContent = ""; return; }
+var utkoma;
+if (hamur() === "afram") {
+var r = reikna(s, b, vi.att, vi.hradi_kt, st.att_til, st.hradi_kt);
+utkoma = t.drift + ": " + (r.drift >= 0 ? "+" : "") + r.drift.toFixed(1) + "°  " + t.driftSkyr + "\n" +
+t.stefnaSjo + ": " + r.stefnaSjo.toFixed(1) + "°\n" +
+t.raunstefna + ": " + r.raun.toFixed(1) + "°\n" +
+t.hradiBotn + ": " + r.hradi.toFixed(2) + " " + t.kt;
+} else {
+var o = reiknaOfugt(s, b, vi.att, vi.hradi_kt, st.att_til, st.hradi_kt);
+if (o === null) {
+utkoma = t.engin;
+} else {
+utkoma = t.oskud + ": " + s.toFixed(1) + "°\n" +
+t.styra + ": " + o.stefna.toFixed(1) + "°\n" +
+t.drift + ": " + (o.r.drift >= 0 ? "+" : "") + o.r.drift.toFixed(1) + "°  " + t.driftSkyr + "\n" +
+t.hradiBotn + ": " + o.r.hradi.toFixed(2) + " " + t.kt;
+}
+}
+$("st-nidurstada").textContent = utkoma;
+}
+function saekja() {
+fetch(SLOD + "?t=" + Date.now())
+.then(function (r) { return r.json(); })
+.then(function (d) { gogn = d; teikna(); })
+.catch(function () { $("st-gogn").textContent = T[mal].villa; });
+}
+$("st-is").addEventListener("click", function () { mal = "is"; teikna(); });
+$("st-en").addEventListener("click", function () { mal = "en"; teikna(); });
+$("st-stefna").addEventListener("input", teikna);
+$("st-hradi").addEventListener("input", teikna);
+var ham = document.getElementsByName("st-ham");
+for (var i = 0; i < ham.length; i++) { ham[i].addEventListener("change", teikna); }
+teikna();
+saekja();
+})();
+</script>
