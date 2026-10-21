@@ -65,7 +65,7 @@ def reikna_ofugt(oskastefna, bat_hradi, vindatt, vindur_kt,
     for i in range(20):
         r = reikna(stefna, bat_hradi, vindatt, vindur_kt,
                    straumur_stefna, straumur_kt)
-        villa = ...
+        villa = (oskastefna - r["raunstefna"] + 180) % 360 - 180
         if abs(villa) < 0.01:
             break
         stefna = ...
